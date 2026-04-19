@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Block Dash Premium</title>
+<style>
+body { margin:0; overflow:hidden; background:#0a0f1f; font-family:Arial; }
+canvas { display:block; }
+#hud {
+ position:absolute;
+ top:10px;
+ width:100%;
+ text-align:center;
+ color:white;
+ font-size:28px;
+ font-weight:bold;
+}
+button {
+ position:absolute;
+ bottom:20px;
+ padding:15px;
+ font-size:20px;
+ border:none;
+ border-radius:10px;
+ background:#00c2ff;
+ color:white;
+}
+#left { left:20px; }
+#right { right:20px; }
+</style>
+</head>
+<body>
+
+<div id="hud">0s</div>
+<canvas id="game"></canvas>
+
+<button id="left">◀</button>
+<button id="right">▶</button>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let player = { y: canvas.height-150, lane:1 };
+let lanes = [canvas.width/4, canvas.width/2, canvas.width*0.75];
+
+let blocks = [];
+let speed = 4;
+let time = 0;
+
+function spawnBlock(){
+ let hole = Math.floor(Math.random()*3);
+ blocks.push({ y:-100, hole });
+}
+
+setInterval(spawnBlock, 1200);
+
+function update(){
+ time += 0.016;
+ document.getElementById("hud").innerText = Math.floor(time)+"s";
+
+ blocks.forEach(b=>{
+  b.y += speed;
+  if(b.y > canvas.height-200){
+    if(player.lane !== b.hole){
+      alert("Game Over");
+      location.reload();
+    }
+  }
+ });
+}
+
+function draw(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ ctx.fillStyle="#111";
+ ctx.fillRect(0, canvas.height-100, canvas.width,100);
+
+ ctx.fillStyle="#00ffcc";
+ ctx.beginPath();
+ ctx.arc(lanes[player.lane], player.y, 25,0,Math.PI*2);
+ ctx.fill();
+
+ ctx.fillStyle="#ff4d4d";
+ blocks.forEach(b=>{
+  for(let i=0;i<3;i++){
+   if(i!==b.hole){
+    ctx.fillRect(lanes[i]-40,b.y,80,40);
+   }
+  }
+ });
+}
+
+function loop(){
+ update();
+ draw();
+ requestAnimationFrame(loop);
+}
+
+loop();
+
+document.getElementById("left").onclick=()=> player.lane=Math.max(0,player.lane-1);
+document.getElementById("right").onclick=()=> player.lane=Math.min(2,player.lane+1);
+</script>
+
+</body>
+</html>
